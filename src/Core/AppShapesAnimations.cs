@@ -1,8 +1,9 @@
 
+using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using System;
-using ColorPalette;
+using GlobalTypeDefinitions;
+using GlobalColorPalette;
 using GlobalConfig;
 using GlobalStates;
 using UtilityClass;
@@ -19,31 +20,31 @@ public partial class App : Game
 
     private void ShapeTransitionAnimation()
     {   
-        if (State.CurrentAnimation == State.AnimationType.None) return;
+        if (State.CurrentAnimation == AnimationType.None) return;
 
         HandleAnimationReset();
 
         switch (State.CurrentAnimation)
         {
-            case State.AnimationType.Gravity:
+            case AnimationType.Gravity:
                 AnimationGravity();
                 break;
-            case State.AnimationType.AntiGravity:
+            case AnimationType.AntiGravity:
                 AnimationAntiGravity();
                 break;
-            case State.AnimationType.Implode:
+            case AnimationType.Implode:
                 AnimationImplode();
                 State.PreviousAnimation = State.CurrentAnimation;
                 break;
-            case State.AnimationType.Lerp:
+            case AnimationType.Lerp:
                 AnimationLerp();
                 State.PreviousAnimation = State.CurrentAnimation;
                 break;
-            case State.AnimationType.Fusion:
+            case AnimationType.Fusion:
                 AnimationFusion();
                 State.PreviousAnimation = State.CurrentAnimation;
                 break;
-            case State.AnimationType.Collapse:
+            case AnimationType.Collapse:
                 AnimationCollapse();
                 State.PreviousAnimation = State.CurrentAnimation;
                 break;
@@ -60,7 +61,7 @@ public partial class App : Game
 
         // Copy _currentshape if transitioning to gravity from another animation
         // use _currentShapeCopy later to resume previous animation
-        if (State.IsFirstGravity && State.PreviousAnimation != State.AnimationType.None)
+        if (State.IsFirstGravity && State.PreviousAnimation != AnimationType.None)
         {   
             TakeAnimationSnapshot();
         }
@@ -76,7 +77,7 @@ public partial class App : Game
         // Animation done?
         if (State.GameTotalTime - State.AnimationStartTime > animationDuration)
         {
-            State.CurrentAnimation = State.AnimationType.None;
+            State.CurrentAnimation = AnimationType.None;
             State.AnimationStartTime = 0;
         }
     }
@@ -87,7 +88,7 @@ public partial class App : Game
         Vector3[] shape = new Vector3[Config.totalShapeSize];
 
         // Use _currentShapeCopy to resume previous animation, if any ongoing before gravity
-        shape = (State.PreviousAnimation == State.AnimationType.None) ? 
+        shape = (State.PreviousAnimation == AnimationType.None) ? 
             _shapes[State.CurrentShape] :
             _currentShapeCopy;
 
@@ -96,7 +97,7 @@ public partial class App : Game
         {   
             // Continue with previous animation if there was one
             State.CurrentAnimation = State.PreviousAnimation;
-            State.PreviousAnimation = State.AnimationType.None;
+            State.PreviousAnimation = AnimationType.None;
             State.AnimationStartTime = State.GameTotalTime;
             State.IsFirstGravity = true;
         }
@@ -109,7 +110,7 @@ public partial class App : Game
         // Animation done?
         if (Lerp(State.CurrentShape, animationDuration))
         {
-            State.CurrentAnimation = State.AnimationType.None;
+            State.CurrentAnimation = AnimationType.None;
         }
     }
 
@@ -152,7 +153,7 @@ public partial class App : Game
                 _currentShape[i].Position.Y = shape[i].Y;
                 _currentShape[i].Position.Z = shape[i].Z;
             }
-            State.CurrentAnimation = State.AnimationType.None;
+            State.CurrentAnimation = AnimationType.None;
             State.AnimationStartTime = 0;
             State.IsFirstFusion = false;
             _transformedPoints.Clear();
@@ -189,7 +190,7 @@ public partial class App : Game
 
             if (State.CollapsePosY == thresholdPosY)
             {
-                State.CurrentAnimation = State.AnimationType.None;
+                State.CurrentAnimation = AnimationType.None;
                 State.AnimationStartTime = 0;
                 State.IsFirstCollapse = true;
             }
@@ -249,7 +250,7 @@ public partial class App : Game
             // Cleanup
             else
             {   
-                State.CurrentAnimation = State.AnimationType.None;
+                State.CurrentAnimation = AnimationType.None;
                 State.AnimationStartTime = 0;
                 break;
             }
@@ -277,7 +278,7 @@ public partial class App : Game
         State.IsFirstGravity = false;
     }
 
-    private bool Lerp(State.ShapeType shapeType, double animationDuration)
+    private bool Lerp(ShapeType shapeType, double animationDuration)
     {   
         Vector3[] shape = _shapes[shapeType];
 
@@ -350,8 +351,8 @@ public partial class App : Game
 
     private void AnimationCollapseReset()
     {   
-        if (State.PreviousAnimation == State.AnimationType.Collapse &&
-            State.CurrentAnimation != State.AnimationType.Collapse)
+        if (State.PreviousAnimation == AnimationType.Collapse &&
+            State.CurrentAnimation != AnimationType.Collapse)
         {
             State.IsFirstCollapse = true;
             State.CollapsePosY = 50;
@@ -360,7 +361,7 @@ public partial class App : Game
 
     private void AnimationFusionReset()
     {
-        if (State.IsFirstFusion && State.PreviousAnimation != State.AnimationType.Fusion)
+        if (State.IsFirstFusion && State.PreviousAnimation != AnimationType.Fusion)
         {
             State.IsFirstFusion = false;
             _transformedPoints.Clear();

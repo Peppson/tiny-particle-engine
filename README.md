@@ -27,8 +27,8 @@ dotnet run -c Release
 
 &nbsp;  
 **Asteriod impact**
-![Asteriod impact](./Images/Asteriod.png)  
+![Asteriod impact](./Images/Impact.png)  
 
-![Random transition](./Images/Random2.png)  
+![Random transition](./Images/Random.png)  
 
 &nbsp;

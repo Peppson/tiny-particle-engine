@@ -14,7 +14,6 @@ public class Menu
     // Positions relative to Config.MenuPos
     public static readonly Vector2 ShapePickerPos = new(27, 280);
     public static readonly Vector2 ColorPickerPos = new(27, 374);
-    public static readonly Vector2 FPSTextPos = new(7, Config.WindowHeight - 20); // Absolute pos
     public readonly Vector2 Text1Pos = new(118, 27);
     public readonly Vector2 Text2Pos = new(28, 252);
     public readonly Vector2 Text3Pos = new(28, 346);

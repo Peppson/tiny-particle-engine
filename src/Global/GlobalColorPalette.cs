@@ -1,7 +1,7 @@
 
 using Microsoft.Xna.Framework;
 
-namespace ColorPalette;
+namespace GlobalColorPalette;
 
 // https://www.nordtheme.com/
 public static class NordColors

@@ -16,7 +16,7 @@
   <!--    DEBUG_COMET;            -->
   <!--    USE_GPU_VERTEX_BUFFER;  -->
   <PropertyGroup>
-    <DefineConstants Condition="'$(Configuration)' == 'Debug'"> DEBUG_USE_KEYBOARD;</DefineConstants>
+    <DefineConstants Condition="'$(Configuration)' == 'Debug'"> DEBUG_USE_KEYBOARD; </DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using GlobalConfig;
-using ColorPalette;
+using GlobalColorPalette;
 using UtilityClass;
 
 namespace monogame;

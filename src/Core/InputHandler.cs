@@ -1,14 +1,15 @@
 
+using System;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using monogame;
-using MenuClass;
-using CameraClass;
-using ColorPalette;
+using GlobalTypeDefinitions;
+using GlobalColorPalette;
 using GlobalStates;
-using System;
+using CameraClass;
+using MenuClass;
 
 namespace InputHandlerClass;
 
@@ -143,8 +144,8 @@ class InputHandler
             State.Gravity =! State.Gravity; // Just for UI btn
 
             State.CurrentAnimation = State.Gravity ?
-                State.AnimationType.Gravity : 
-                State.AnimationType.AntiGravity;
+                AnimationType.Gravity : 
+                AnimationType.AntiGravity;
 
             State.AnimationStartTime = State.GameTotalTime;
         } 
@@ -156,12 +157,12 @@ class InputHandler
             return;
 
         // Shape buttons
-        var shapeButtons = new Dictionary<string, (State.ShapeType shape, State.AnimationType animation)>
+        var shapeButtons = new Dictionary<string, (ShapeType shape, AnimationType animation)>
         {
-            { "ShapeBtn1", (State.ShapeType.Sphere,     State.AnimationType.Collapse)   },
-            { "ShapeBtn2", (State.ShapeType.Torus,      State.AnimationType.Implode)    },
-            { "ShapeBtn3", (State.ShapeType.Frequency,  State.AnimationType.Lerp)       },
-            { "ShapeBtn4", (State.ShapeType.Pointcloud, State.AnimationType.Fusion)     }
+            { "ShapeBtn1", (ShapeType.Sphere,     AnimationType.Collapse)   },
+            { "ShapeBtn2", (ShapeType.Torus,      AnimationType.Implode)    },
+            { "ShapeBtn3", (ShapeType.Frequency,  AnimationType.Lerp)       },
+            { "ShapeBtn4", (ShapeType.Pointcloud, AnimationType.Fusion)     }
         };
 
         // Any button pressed?
@@ -254,9 +255,9 @@ class InputHandler
 
         private void Key_Q() {  }
         private void Key_G() { _app._newStep++; }
-        private void Key_E() { State.CurrentAnimation = State.AnimationType.AntiGravity; }
-        private void Key_C() { State.CurrentAnimation = State.AnimationType.Implode; }
-        private void Key_V() { State.CurrentAnimation = State.AnimationType.Gravity; }
+        private void Key_E() { State.CurrentAnimation = AnimationType.AntiGravity; }
+        private void Key_C() { State.CurrentAnimation = AnimationType.Implode; }
+        private void Key_V() { State.CurrentAnimation = AnimationType.Gravity; }
         private void Key_R() { _app.Reset(); }
 
         private void Key_Left() { /* _menu.Text6Pos.X--; */ Console.WriteLine($"{nameof(_menu.Text6Pos)}: {_menu.Text6Pos}"); }

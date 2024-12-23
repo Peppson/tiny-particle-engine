@@ -1,21 +1,12 @@
 
 using Color = Microsoft.Xna.Framework.Color;
+using GlobalTypeDefinitions;
 using GlobalConfig;
 
 namespace GlobalStates;
 
 public static class State
 {
-    public enum ShapeType
-    {
-        Sphere, Torus, Frequency, Pointcloud
-    }
-
-    public enum AnimationType
-    {
-        None, Gravity, AntiGravity, Implode, Lerp, Fusion, Collapse
-    }
-
     public static ShapeType CurrentShape { get; set; }
     public static Color CurrentColor { get; set; }
     public static float GameSpeedFactor { get; set; }

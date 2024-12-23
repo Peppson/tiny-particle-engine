@@ -3,16 +3,17 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using GlobalTypeDefinitions;
+using GlobalColorPalette;
 using GlobalConfig;
 using GlobalStates;
-using ColorPalette;
 
 namespace monogame;
 
 public partial class App : Game
 {   
     // Shapes
-    private Dictionary<State.ShapeType, Vector3[]> _shapes = [];
+    private Dictionary<ShapeType, Vector3[]> _shapes = [];
     private VertexPositionColor[] _currentShape = new VertexPositionColor[Config.totalShapeSize];
     private VertexPositionColor[] _centerCube;
     private readonly Vector3 _origin = new(0, 0, 0);
@@ -20,17 +21,17 @@ public partial class App : Game
 
     public void LoadAllShapes() 
     {   
-        _shapes.Add(State.ShapeType.Sphere,     CreateSphere());
-        _shapes.Add(State.ShapeType.Torus,      CreateTorus());
-        _shapes.Add(State.ShapeType.Frequency,  CreateFrequency());
-        _shapes.Add(State.ShapeType.Pointcloud, CreatePointCloud());
-        _centerCube =                           CreateCube();
+        _shapes.Add(ShapeType.Sphere,       CreateSphere());
+        _shapes.Add(ShapeType.Torus,        CreateTorus());
+        _shapes.Add(ShapeType.Frequency,    CreateFrequency());
+        _shapes.Add(ShapeType.Pointcloud,   CreatePointCloud());
+        _centerCube =                       CreateCube();
 
         SetCurrentShape(Config.shapeOnStartup);
         InitAnimationComet(); // TODO
     }
 
-    public void SetCurrentShape(State.ShapeType shapeType)
+    public void SetCurrentShape(ShapeType shapeType)
     {   
         Vector3[] shape = _shapes[shapeType];
 

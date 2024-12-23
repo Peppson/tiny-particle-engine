@@ -1,18 +1,18 @@
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using GlobalTypeDefinitions;
+using GlobalColorPalette;
 using GlobalConfig;
 using GlobalStates;
-using ColorPalette;
 using InputHandlerClass;
-using MenuClass;
 using SpriteClass;
 using UtilityClass;
 
 namespace monogame;
 
 public partial class App : Game
-{
+{   
     public void RenderGeometry()
     {   
         foreach (var pass in _basicEffect.CurrentTechnique.Passes)
@@ -110,16 +110,16 @@ public partial class App : Game
         // Rendering selected btn ontop of the small atm...
         switch (State.CurrentShape)
         {
-            case State.ShapeType.Sphere:
+            case ShapeType.Sphere:
                 Render(_menu.sprites["ShapeBtn1Big"]);        
                 break;
-            case State.ShapeType.Torus:
+            case ShapeType.Torus:
                 Render(_menu.sprites["ShapeBtn2Big"]);
                 break;
-            case State.ShapeType.Frequency:
+            case ShapeType.Frequency:
                 Render(_menu.sprites["ShapeBtn3Big"]);
                 break;
-            case State.ShapeType.Pointcloud:
+            case ShapeType.Pointcloud:
                 Render(_menu.sprites["ShapeBtn4Big"]);
                 break;
         }
@@ -162,20 +162,59 @@ public partial class App : Game
         }
     }  
 
-    private void RenderText() 
-    {
-        _spriteBatch.DrawString(_font, Config.windowTitle, Config.menuPos + _menu.Text1Pos, NordColors.White);
-        _spriteBatch.DrawString(_font, "Auto rotation", Config.menuPos + _menu.Text5Pos, NordColors.White);
-        _spriteBatch.DrawString(_font, "Gravity", Config.menuPos + _menu.Text6Pos, NordColors.White);
-
-        // Lazy spacing
-        _spriteBatch.DrawString(_font, "Sphere           Torus              Freq              Cube", 
-            Config.menuPos + _menu.Text4Pos, NordColors.White);
-
-        _spriteBatch.DrawString(_font, "Shape", Config.menuPos + _menu.Text2Pos, NordColors.White);
-        _spriteBatch.DrawString(_font, "Color", Config.menuPos + _menu.Text3Pos, NordColors.White);
+    private void RenderText()
+    {   
+        _spriteBatch.DrawString(_font,          // Font
+            Config.windowTitle,                 // String
+            Config.menuPos + _menu.Text1Pos,    // Position
+            NordColors.White                    // Color
+        );
+        _spriteBatch.DrawString(_font, 
+            "Auto rotation", 
+            Config.menuPos + _menu.Text5Pos, 
+            NordColors.White
+        );
+        _spriteBatch.DrawString(_font, 
+            "Gravity", 
+            Config.menuPos + _menu.Text6Pos, 
+            NordColors.White
+        );
+        _spriteBatch.DrawString(_font, 
+            "Sphere           Torus              Freq              Cube", 
+            Config.menuPos + _menu.Text4Pos, 
+            NordColors.White
+        );
+        _spriteBatch.DrawString(_font, 
+            "Shape", 
+            Config.menuPos + _menu.Text2Pos, 
+            NordColors.White
+        );
+        _spriteBatch.DrawString(_font, 
+            "Color", 
+            Config.menuPos + _menu.Text3Pos, 
+            NordColors.White
+        );
         
-        // FPS
-        _spriteBatch.DrawString(_font, $"FPS: {_FPS}", Menu.FPSTextPos, NordColors.White);
+        // Info text
+        _spriteBatch.DrawString(_font, 
+            $"Fps: {_FPS}", 
+            Config.fpsPos, 
+            NordColors.White
+        );
+        _spriteBatch.DrawString(_font, 
+            $"Zoom: {_cam.CameraState.Zoom}%", 
+            Config.zoomPos, 
+            NordColors.White
+        );
+        _spriteBatch.DrawString(_font, 
+            $"Cam X: {_cam.CameraState.RotationX}°", 
+            Config.camXPos, 
+            NordColors.White
+        );
+        _spriteBatch.DrawString(_font, 
+            $"Cam Y: {_cam.CameraState.RotationY}°", 
+            Config.camYPos, 
+            NordColors.White
+        );
     } 
 }

@@ -3,8 +3,10 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
+using GlobalTypeDefinitions;
 using GlobalConfig;
 using GlobalStates;
+using UtilityClass;
 
 namespace CameraClass;
 
@@ -12,10 +14,12 @@ public class Camera
 {
     public Matrix ProjectionMatrix { get; private set; }
     public Matrix ViewMatrix { get; private set; }
-    public Matrix WorldMatrix { get; set; }
+    public Matrix WorldMatrix { get; private set; }
+    public CameraState CameraState;
     private Vector3 _cameraTarget;
     private Vector3 _cameraPosition;
-    public Vector2 _worldMatrixRotation;
+    private Vector2 _worldMatrixRotation;
+    private const float _Tau = (float)(Math.PI * 2);
 
 
     public Camera(GraphicsDevice GraphicsDevice)
@@ -38,8 +42,9 @@ public class Camera
         ViewMatrix = Matrix.CreateLookAt(_cameraPosition, _cameraTarget, Vector3.Up);
         WorldMatrix = Matrix.CreateWorld(_cameraTarget, Vector3.Forward, Vector3.Up);
 
-        // Rotate worldMatrix 90 degrees to align XYZ
+        // Init
         ResetWorldMatrix();
+        UpdateCameraStateZoom();
     }
 
     public void RotateView(MouseState newMouseState, MouseState oldMouseState)
@@ -55,6 +60,8 @@ public class Camera
         _worldMatrixRotation.X += deltaX * sensitivity;
         _worldMatrixRotation.Y -= deltaY * sensitivity;
         WorldMatrix = Matrix.CreateRotationY(_worldMatrixRotation.X) * Matrix.CreateRotationX(_worldMatrixRotation.Y);
+
+        UpdateCameraStateDegrees();
     }
 
     public void DragView(MouseState newMouseState, MouseState oldMouseState)
@@ -88,6 +95,8 @@ public class Camera
             _cameraPosition.Z -= sensitivity;
             _cameraPosition.Z = Math.Max(_cameraPosition.Z, -600);
         }
+
+        UpdateCameraStateZoom();
     }
 
     public void RotateViewAuto(bool isMousePressed)
@@ -100,10 +109,12 @@ public class Camera
         State.AutoRotationEaseInFactor += 0.0033f * State.GameSpeedFactor;
         State.AutoRotationEaseInFactor = Math.Min(State.AutoRotationEaseInFactor, 1);
 
-        float rotationSpeed = 0.00016f * State.GameSpeedFactor * State.AutoRotationEaseInFactor;
+        float rotationSpeed = 0.00014f * State.GameSpeedFactor * State.AutoRotationEaseInFactor;
 
         _worldMatrixRotation.X += rotationSpeed;
         WorldMatrix = Matrix.CreateRotationY(_worldMatrixRotation.X) * Matrix.CreateRotationX(_worldMatrixRotation.Y);
+
+        UpdateCameraStateDegrees();
     }
 
     public void RotateViewForTorus()
@@ -111,6 +122,7 @@ public class Camera
         // Change Y-axis small amount when showing "Torus"
         _worldMatrixRotation.Y -= 0.28f;
         WorldMatrix = Matrix.CreateRotationY(_worldMatrixRotation.X) * Matrix.CreateRotationX(_worldMatrixRotation.Y);
+        UpdateCameraStateDegrees();
     }
 
     public void UpdateViewMatrix()
@@ -123,23 +135,69 @@ public class Camera
         _cameraTarget = Vector3.Zero;
         _cameraPosition = new Vector3(0f, 0f, Config.cameraDefaultZoom);
         ResetWorldMatrix();
+        UpdateCameraStateZoom();
     }
 
     private void ResetWorldMatrix()
-    {
-        _worldMatrixRotation = new Vector2(MathHelper.ToRadians(-180), 0);
+    {   
+        _worldMatrixRotation = new Vector2(MathHelper.ToRadians(0), 0);
         WorldMatrix = Matrix.CreateRotationY(_worldMatrixRotation.X) * Matrix.CreateRotationX(_worldMatrixRotation.Y);
     }
-      
-    public void PrintCameraXYZ(string txt = "")
+
+    private void UpdateCameraStateDegrees()
+    {   
+        CameraState.RotationX = ConvertRadianToDegrees(_worldMatrixRotation.X);
+        CameraState.RotationY = ConvertRadianToDegrees(_worldMatrixRotation.Y);
+    }
+
+    private static int ConvertRadianToDegrees(float angle)
+    {
+        // Wrap around Tau and guard against negative values
+        float radian = angle % _Tau;
+        if (radian < 0) 
+        { 
+            radian += _Tau; 
+        }
+        
+        // Radians to degrees and truncate to nearest whole num
+        int degree = (int)(radian * (180f / (float)Math.PI));
+        if (degree == 360)
+        {
+            degree = 0;
+        }
+
+        return degree;
+    }
+
+    private void UpdateCameraStateZoom() 
+    {
+        CameraState.Zoom = Map(_cameraPosition.Z, -10, -600, 100, 0);
+    }
+
+    private static int Map(float input, float fromMin, float fromMax, float toMin, float toMax)
+    {
+        return (int)(toMin + (toMax - toMin) * ((input - fromMin) / (fromMax - fromMin)));
+    }
+
+    // Debug
+    public void PrintCameraXYZ(string txt = "", bool asInfoText = false)
     {   
         #if DEBUG
             if (txt != "") Console.WriteLine($"---- {txt} ----");
-
             Console.WriteLine($"Position:         Target:");
-            Console.WriteLine($"X: {_cameraPosition.X, 10}     X: {_cameraTarget.X, 10}");
-            Console.WriteLine($"Y: {_cameraPosition.Y, 10}     Y: {_cameraTarget.Y, 10}");
-            Console.WriteLine($"Z: {_cameraPosition.Z, 10}     Z: {_cameraTarget.Z, 10}\n");
+
+            if (asInfoText)
+            {
+                Console.WriteLine($"X: {CameraState.RotationX}°");
+                Console.WriteLine($"Y: {CameraState.RotationY}°");
+                Console.WriteLine($"Z: {CameraState.Zoom}%");
+            }
+            else 
+            {
+                Console.WriteLine($"X: {_cameraPosition.X, 10}     X: {_cameraTarget.X, 10}");
+                Console.WriteLine($"Y: {_cameraPosition.Y, 10}     Y: {_cameraTarget.Y, 10}");
+                Console.WriteLine($"Z: {_cameraPosition.Z, 10}     Z: {_cameraTarget.Z, 10}\n");
+            }
         #endif
     }
 }
