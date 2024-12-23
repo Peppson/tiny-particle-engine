@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>    
+    <Optimize>true</Optimize>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RollForward>Major</RollForward>
+    <PublishReadyToRun>false</PublishReadyToRun>
+    <TieredCompilation>false</TieredCompilation>
+    <UseWindowsForms>false</UseWindowsForms>
+
+    <OutputType Condition="'$(Configuration)' == 'Release'">WinExe</OutputType>
+    <OutputType Condition="'$(Configuration)' == 'Debug'">Exe</OutputType>
+  </PropertyGroup>
+
+  <!--    #define debug symbols   -->
+  <!--    DEBUG_USE_KEYBOARD;     -->
+  <!--    DEBUG_COMET;            -->
+  <!--    USE_GPU_VERTEX_BUFFER;  -->
+  <PropertyGroup>
+    <DefineConstants Condition="'$(Configuration)' == 'Debug'"> DEBUG_USE_KEYBOARD;</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ApplicationManifest>../app.manifest</ApplicationManifest>
+    <ApplicationIcon>../Assets/Icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <MonoGameContentReference Include="../Assets\AssetBuilder.mgcb" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.2.1105" />
+    <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.2.1105" />
+  </ItemGroup>
+
+  <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
+    <Message Text="Restoring dotnet tools" Importance="High" />
+    <Exec Command="dotnet tool restore" />
+  </Target>
+</Project>

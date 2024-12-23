@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <!-- Redirect bin/ to Build/ -->
+    <BaseIntermediateOutputPath>../Build/obj/</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>../Build/obj/$(Configuration)/</IntermediateOutputPath>
+    <OutputPath>../Build/bin/$(Configuration)/</OutputPath>
+
+    <!-- Redirect obj/ to Build/ -->
+    <MSBuildProjectExtensionsPath>../Build/obj/</MSBuildProjectExtensionsPath>
+  </PropertyGroup>
+</Project>
