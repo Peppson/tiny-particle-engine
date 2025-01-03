@@ -28,7 +28,7 @@ dotnet run -c Release
 ![Random state](./Images/RandomStateNew.png)  
 
 Asteroid impact
-![Asteroid impact](./Images/Impact.png)  
+![Asteroid impact](./Images/AsteroidImpact.png)
 
 Gravity
 ![Gravity](./Images/Gravity.png) 
