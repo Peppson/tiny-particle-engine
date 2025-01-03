@@ -1,17 +1,16 @@
 
 # tiny-particle-engine ☄️
 
-Work in progress 👷  
-My attempt at some linear algebra and collision detection between points in 3D space.  
+My attempt at some linear algebra and collision detection between points in 3D-space.   
 Built with C# and [Monogame](https://monogame.net/).  
 
-* Transitions/animations when switching shapes
-* Camera: drag, zoom and rotate
-* Random 3D-effects
-* Multiple effects and animations can run simultaneously
+* Shot asteroids from any angle
+* Transitions, Animations and 3D-effects
+* Camera controls: Zoom, Rotate, and Pan
+* Fully dynamic: Multiple effects/animations/asteroids can run simultaneously
 
 ## Requirements
-* A computer! (windows)
+* A computer! (Windows)
 * [.NET 9.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet)    
   
 <details>
@@ -23,12 +22,19 @@ cd tiny-particle-engine/src &&
 dotnet run -c Release
 ```
 
-</details>
-
+</details>    
 &nbsp;  
-**Asteriod impact**
-![Asteriod impact](./Images/Impact.png)  
 
-![Random transition](./Images/Random.png)  
+![Random state](./Images/RandomStateNew.png)  
 
+Asteroid impact
+![Asteroid impact](./Images/Impact.png)  
+
+Gravity
+![Gravity](./Images/Gravity.png) 
+
+
+## Todos
+- [ ] Replace the helicopter with a proper 3D-axis model.
+- [ ] Add effect for "Impact" shape.
 &nbsp;

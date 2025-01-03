@@ -1,52 +1,111 @@
 
+using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using GlobalTypeDefinitions;
-using GlobalColorPalette;
-using GlobalConfig;
-using GlobalStates;
-using InputHandlerClass;
-using SpriteClass;
-using UtilityClass;
+using Particle.Global;
+using Particle.Ui;
+using Utility;
 
-namespace monogame;
+namespace Particle.Core;
 
-public partial class App : Game
+public partial class App
 {   
-    public void RenderGeometry()
+    public void RenderNormal()
+    {
+        // Set main viewport camera matrices
+        SetMainViewport();
+
+        // Render main viewport
+        RenderGeometry();
+        RenderSprites();
+
+        // Set small viewport camera matrices and render
+        GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+        GraphicsDevice.Viewport = _cam.smallViewport.viewport;
+        RenderSmallViewport();
+    }
+
+    public void RenderStartup()
     {   
+        // Set small viewport matrices and render
+        GraphicsDevice.Viewport = _cam.smallViewport.viewport;
+        RenderSmallViewport();
+
+        // Set main viewport matrices and render
+        SetMainViewport();
+        RenderGeometry();
+        RenderSprites(true);
+    }
+
+    private void RenderGeometry()
+    {   
+        #if !DEBUG_GRAVITY
+            var renderTarget = GetRenderTarget();
+        #endif
+
         foreach (var pass in _basicEffect.CurrentTechnique.Passes)
-        {
+        {   
             pass.Apply();
 
             // Current shape
-            GraphicsDevice.DrawUserPrimitives(PrimitiveType.PointList, _currentShape, 0, _currentShape.Length);
+            #if !DEBUG_GRAVITY
+                GraphicsDevice.DrawUserPrimitives(PrimitiveType.PointList, renderTarget, 0, Config.totalShapeSize);
+            #endif
 
-            // Origin cube
-            GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, _centerCube, 0, 12);
+            // Center cube
+            GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, _miscShapes[ShapeType.CenterCube], 0, 12);
 
-            // Comet
-            if (RenderComet)
-                GraphicsDevice.DrawUserPrimitives(PrimitiveType.PointList, _comet, 0, _comet.Length);
+            // Asteroid(s)
+            if (_asteroids.Count > 0) RenderAsteroids();
 
+            // Debug
             #if DEBUG_COMET
-                GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, debugComet, 0, 12);
-                GraphicsDevice.DrawUserPrimitives(PrimitiveType.LineStrip, debugCometTrajectory, 0, 1);
+                GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, _debugAsteroid, 0, 12);
+            #endif
+
+            #if DEBUG_GRAVITY
+                GraphicsDevice.DrawUserPrimitives(PrimitiveType.PointList, _currentShapeCopy, 0, Config.totalShapeSize);
+                GraphicsDevice.DrawUserPrimitives(PrimitiveType.PointList, _currentShape, 0, Config.totalShapeSize);
             #endif
         }
     }
 
-    public void RenderSprites()
+    private void RenderSmallViewport()
+    {   
+        if (State.IsMemeEnabled) return;
+
+        foreach (ModelMesh mesh in _model.Meshes)
+        {
+            foreach (BasicEffect effect in mesh.Effects)
+            {
+                effect.World = _modelRotation * _cam.smallViewport.world;
+                effect.View = _cam.smallViewport.view;
+                effect.Projection = _cam.smallViewport.projection;
+            }
+
+            mesh.Draw();
+        }
+    }
+
+    private void RenderSprites(bool isStartup = false)
     {   
         _spriteBatch.Begin();
-        RenderMenuWindow();
+
+        RenderMeme();
+        RenderMenu();
         RenderResetButton();        
+        RenderToggleButtons();
         RenderLine();
-        RenderShapePicker();
-        RenderColorPicker();
+        RenderShapeButtons();
+        RenderColorButtons();
         RenderText();
-        RenderToggleButton("Toggle1");
-        RenderToggleButton("Toggle2");
+        RenderShotMeText();
+        //RenderScreenGridDebug();
+
+        if (isStartup) 
+            RenderStartupWindow();
+
         _spriteBatch.End();
     }
 
@@ -80,7 +139,47 @@ public partial class App : Game
         );
     }
 
-    private void RenderMenuWindow()
+    private void RenderAsteroids() 
+    {   
+        if (State.IsMemeEnabled) return;
+
+        for (int i = 0; i < _asteroids.Count; i++)
+        {
+            GraphicsDevice.DrawUserPrimitives(
+                PrimitiveType.LineStrip,
+                _asteroids[i].vertexData, 
+                0, 
+                _asteroids[i].vertexData.Length / 2
+            );
+        }
+    }
+
+    private void RenderToggleButtons()
+    {   
+        var buttonMap = new Dictionary<string, bool>
+        {
+            { "Toggle1", State.IsPaused },
+            { "Toggle2", State.IsGravity },
+            { "Toggle3", State.IsEffect }
+        };
+
+        foreach (var (button, buttonState) in buttonMap)
+        {
+            // "ON"
+            if (buttonState)
+            {
+                Render(_menu.sprites[$"{button}Blue"]);
+                Render(_menu.sprites[$"{button}Circle"], new Vector2(20, 0));
+            }
+            else // "OFF" 
+            {
+                Render(_menu.sprites[$"{button}Grey"]);
+                Render(_menu.sprites[$"{button}Circle"]);
+            }
+        }
+    } 
+
+    private void RenderMenu()
     {   
         const string menu = Config.isMenuDebug ? "MenuDebug" : "MenuBackground";
         const int alpha = 240;
@@ -99,7 +198,7 @@ public partial class App : Game
         Render(_menu.sprites["Line"]);
     }
 
-    private void RenderShapePicker() 
+    private void RenderShapeButtons()
     {   
         Render(_menu.sprites["ShapeBackground"]);
         Render(_menu.sprites["ShapeBtn1"]);
@@ -107,25 +206,16 @@ public partial class App : Game
         Render(_menu.sprites["ShapeBtn3"]);
         Render(_menu.sprites["ShapeBtn4"]);
 
-        // Rendering selected btn ontop of the small atm...
         switch (State.CurrentShape)
         {
-            case ShapeType.Sphere:
-                Render(_menu.sprites["ShapeBtn1Big"]);        
-                break;
-            case ShapeType.Torus:
-                Render(_menu.sprites["ShapeBtn2Big"]);
-                break;
-            case ShapeType.Frequency:
-                Render(_menu.sprites["ShapeBtn3Big"]);
-                break;
-            case ShapeType.Pointcloud:
-                Render(_menu.sprites["ShapeBtn4Big"]);
-                break;
+            case ShapeType.Sphere:      Render(_menu.sprites["ShapeBtn1Big"]);  break;
+            case ShapeType.Impact:      Render(_menu.sprites["ShapeBtn2Big"]);  break;
+            case ShapeType.Frequency:   Render(_menu.sprites["ShapeBtn3Big"]);  break;
+            case ShapeType.Pointcloud:  Render(_menu.sprites["ShapeBtn4Big"]);  break;
         }
     } 
 
-    private void RenderColorPicker()
+    private void RenderColorButtons()
     {   
         Render(_menu.sprites["BtnBackground"]);
         Render(_menu.sprites["BtnBlue"]);
@@ -133,88 +223,168 @@ public partial class App : Game
         Render(_menu.sprites["BtnOrange"]);
         Render(_menu.sprites["BtnWhite"]);
 
-        // Rendering selected btn ontop of the small atm...
-        if (State.CurrentColor == NordColors.White)
-            Render(_menu.sprites["BtnWhiteBig"]);
-        else if (State.CurrentColor == NordColors.Blue)
-            Render(_menu.sprites["BtnBlueBig"]);
-        else if (State.CurrentColor == NordColors.Green)
-            Render(_menu.sprites["BtnGreenBig"]);
-        else if (State.CurrentColor == NordColors.Orange)
-            Render(_menu.sprites["BtnOrangeBig"]);
+        if (State.CurrentColor == ColorPalette.White)         Render(_menu.sprites["BtnWhiteBig"]);
+        else if (State.CurrentColor == ColorPalette.Blue)     Render(_menu.sprites["BtnBlueBig"]);
+        else if (State.CurrentColor == ColorPalette.Green)    Render(_menu.sprites["BtnGreenBig"]);
+        else if (State.CurrentColor == ColorPalette.Orange)   Render(_menu.sprites["BtnOrangeBig"]);
     }
 
-    private void RenderToggleButton(string button)
+    private void RenderScreenGridDebug() 
     {   
-        bool buttonState = (button == "Toggle1") ? State.AutoRotation : State.Gravity;
-
-        // "ON"
-        if (buttonState)
-        {
-            Render(_menu.sprites[$"{button}Blue"]);
-            Render(_menu.sprites[$"{button}Circle"], new Vector2(20, 0));
-        }
-        // "OFF"
-        else 
-        {
-            Render(_menu.sprites[$"{button}Grey"]);
-            Render(_menu.sprites[$"{button}Circle"]);
-        }
-    }  
+        var grid = _menu.sprites["ScreenGrid"];
+        _spriteBatch.Draw(
+            grid.Texture,
+            new Vector2(0, 0),
+            null,
+            Color.White,
+            0f, 
+            Vector2.Zero, 
+            grid.Scale,
+            SpriteEffects.None,
+            0f
+        );
+    }
 
     private void RenderText()
     {   
-        _spriteBatch.DrawString(_font,          // Font
-            Config.windowTitle,                 // String
-            Config.menuPos + _menu.Text1Pos,    // Position
-            NordColors.White                    // Color
-        );
-        _spriteBatch.DrawString(_font, 
-            "Auto rotation", 
-            Config.menuPos + _menu.Text5Pos, 
-            NordColors.White
-        );
-        _spriteBatch.DrawString(_font, 
-            "Gravity", 
-            Config.menuPos + _menu.Text6Pos, 
-            NordColors.White
-        );
-        _spriteBatch.DrawString(_font, 
-            "Sphere           Torus              Freq              Cube", 
-            Config.menuPos + _menu.Text4Pos, 
-            NordColors.White
-        );
-        _spriteBatch.DrawString(_font, 
-            "Shape", 
-            Config.menuPos + _menu.Text2Pos, 
-            NordColors.White
-        );
-        _spriteBatch.DrawString(_font, 
-            "Color", 
-            Config.menuPos + _menu.Text3Pos, 
-            NordColors.White
-        );
-        
+        // Menu window
+        _spriteBatch.DrawString(_font.medium, Config.title,  _menu.mainMenuPos + _menu.mainText1, ColorPalette.White);
+        _spriteBatch.DrawString(_font.small, "Pause",        _menu.mainMenuPos + _menu.mainText2, ColorPalette.White);
+        _spriteBatch.DrawString(_font.small, "Gravity",      _menu.mainMenuPos + _menu.mainText3, ColorPalette.White);
+        _spriteBatch.DrawString(_font.small, "Effect",       _menu.mainMenuPos + _menu.mainText4, ColorPalette.White);
+        _spriteBatch.DrawString(_font.small, "Shape",        _menu.mainMenuPos + _menu.mainText5, ColorPalette.White);
+        _spriteBatch.DrawString(_font.small, "Color",        _menu.mainMenuPos + _menu.mainText6, ColorPalette.White);
+        _spriteBatch.DrawString(_font.small, "Sphere",       _menu.mainMenuPos + _menu.mainText7, ColorPalette.White);
+        _spriteBatch.DrawString(_font.small, "Freq",         _menu.mainMenuPos + _menu.mainText9, ColorPalette.White);
+        _spriteBatch.DrawString(_font.small, "Impact",       _menu.mainMenuPos + _menu.mainText8, ColorPalette.White);
+        _spriteBatch.DrawString(_font.small, "Cube",         _menu.mainMenuPos + _menu.mainText10, ColorPalette.White);
+
         // Info text
-        _spriteBatch.DrawString(_font, 
-            $"Fps: {_FPS}", 
-            Config.fpsPos, 
-            NordColors.White
+        _spriteBatch.DrawString(_font.small, $"Fps:",                                             Config.fpsPos,  ColorPalette.Blue);
+        _spriteBatch.DrawString(_font.small, $"           {_FPS}",                                Config.fpsPos,  ColorPalette.WhiteMin);
+        _spriteBatch.DrawString(_font.small, $"Zoom:",                                            Config.zoomPos, ColorPalette.Blue);
+        _spriteBatch.DrawString(_font.small, $"               {_cam.CameraInfo.Zoom}%",          Config.zoomPos, ColorPalette.WhiteMin);
+        _spriteBatch.DrawString(_font.small, $"Cam X:",                                           Config.camXPos, ColorPalette.Blue);
+        _spriteBatch.DrawString(_font.small, $"                 {_cam.CameraInfo.RotationX}°",   Config.camXPos, ColorPalette.WhiteMin);
+        _spriteBatch.DrawString(_font.small, $"Cam Y:",                                           Config.camYPos, ColorPalette.Blue);
+        _spriteBatch.DrawString(_font.small, $"                 {_cam.CameraInfo.RotationY}°",   Config.camYPos, ColorPalette.WhiteMin);
+        
+        // Meme or normal asteroids counter
+        if (State.IsMemeEnabled)
+        {
+            _spriteBatch.DrawString(_font.small, $"Kalvar:", Config.countPos, ColorPalette.OrangeMax);
+            _spriteBatch.DrawString(_font.small, $"                 {AsteroidCount}/{Config.asteroidMaxCount}",    
+                Config.countPos, 
+                ColorPalette.WhiteMin
+            );
+        }
+        else 
+        {
+            _spriteBatch.DrawString(_font.small, $"Asteroids:", Config.countPos, ColorPalette.Blue);
+            _spriteBatch.DrawString(_font.small, $"                        {AsteroidCount}/{Config.asteroidMaxCount}",    
+                Config.countPos, 
+                ColorPalette.WhiteMin
+            );
+        }
+    }
+    
+    private void RenderShotMeText()
+    {   
+        if (!State.IsShotMeEnabled) return;
+
+        Vector3 textPosition = new(
+            _origin.X - 17f,
+            _origin.Y,
+            _origin.Z
         );
-        _spriteBatch.DrawString(_font, 
-            $"Zoom: {_cam.CameraState.Zoom}%", 
-            Config.zoomPos, 
-            NordColors.White
+
+        Vector3 screenPosition = _cam.mainViewport.viewport.Project(
+            textPosition,
+            _cam.mainViewport.projection,
+            _cam.mainViewport.view,
+            Matrix.Identity
         );
-        _spriteBatch.DrawString(_font, 
-            $"Cam X: {_cam.CameraState.RotationX}°", 
-            Config.camXPos, 
-            NordColors.White
+
+        _spriteBatch.DrawString(
+            _font.small, 
+            $"<-  Press                       to shot an Asteroid!", 
+            new Vector2(screenPosition.X, screenPosition.Y - 8), 
+            ColorPalette.WhiteMin
         );
-        _spriteBatch.DrawString(_font, 
-            $"Cam Y: {_cam.CameraState.RotationY}°", 
-            Config.camYPos, 
-            NordColors.White
+        _spriteBatch.DrawString(
+            _font.small, 
+            $"                    Spacebar", 
+            new Vector2(screenPosition.X, screenPosition.Y - 8), 
+            ColorPalette.Orange
         );
-    } 
+    }
+
+    private void RenderMeme() // This is good
+    {   
+        if (!State.IsMemeEnabled) return;
+
+        Sprite meme = _menu.sprites["meme"];
+        RenderMemeAsteroids(meme);
+
+        _spriteBatch.Draw(
+            meme.Texture,
+            new Vector2(Config.WindowWidth - 120, Config.WindowHeight - 125),
+            null,
+            Color.White,
+            0f, 
+            Vector2.Zero, 
+            meme.Scale * 0.8f,
+            SpriteEffects.None, 
+            0f
+        );
+    }
+
+    private void RenderMemeAsteroids(Sprite meme) 
+    {
+        Matrix worldRotationMatrix =
+            Matrix.CreateRotationX(_cam.worldMatrixRotation.Y) * 
+            Matrix.CreateRotationY(_cam.worldMatrixRotation.X);
+
+        // Foreach "asteroid"
+        for (int i = 0; i < _asteroids.Count; i++)
+        {
+            float scale = 1 / _asteroids[i].lerpFactor;
+
+            // Project the 3D to 2D screen space for sprites
+            Vector3 screenPosition = _cam.mainViewport.viewport.Project(
+                _asteroids[i].oldPosition,
+                _cam.mainViewport.projection,
+                _cam.mainViewport.view,
+                worldRotationMatrix
+            );
+
+            _spriteBatch.Draw(
+                meme.Texture,
+                new Vector2(screenPosition.X, screenPosition.Y),
+                null,
+                Color.White,
+                0f, 
+                Vector2.Zero, 
+                meme.Scale * scale * 0.2f,
+                SpriteEffects.None, 
+                0f
+            );
+        }
+    }
+
+    private static VertexPositionColor[] GetRenderTarget() 
+    {
+        if (State.RenderTarget == RenderType.Normal)
+            return _currentShape;
+        else 
+            return _currentShapeCopy;
+    }
+
+    private void SetMainViewport()
+    {
+        GraphicsDevice.Viewport = _cam.mainViewport.viewport;
+        _basicEffect.World = _cam.mainViewport.world;
+        _basicEffect.View = _cam.mainViewport.view;
+        _basicEffect.Projection = _cam.mainViewport.projection;
+    }
 }

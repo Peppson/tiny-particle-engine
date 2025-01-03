@@ -1,145 +1,86 @@
 
 using System;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using GlobalTypeDefinitions;
-using GlobalColorPalette;
-using GlobalConfig;
-using GlobalStates;
+using Particle.Global;
+using Utility;
 
-namespace monogame;
+namespace Particle.Core;
 
-public partial class App : Game
+public partial class App
 {   
-    // Shapes
-    private Dictionary<ShapeType, Vector3[]> _shapes = [];
-    private VertexPositionColor[] _currentShape = new VertexPositionColor[Config.totalShapeSize];
-    private VertexPositionColor[] _centerCube;
-    private readonly Vector3 _origin = new(0, 0, 0);
+    private static readonly Dictionary<ShapeType, Vector3[]> _shapes = [];
+    private static readonly Dictionary<ShapeType, VertexPositionColor[]> _miscShapes = [];    
+    private static VertexPositionColor[] _currentShape = new VertexPositionColor[Config.totalShapeSize];
+    private static VertexPositionColor[] _currentShapeCopy = new VertexPositionColor[Config.totalShapeSize];
+    private static readonly Vector3 _origin = new(0, 0, 0);
+    private static Model _model;
+    private static Matrix _modelRotation;
+  
 
-
-    public void LoadAllShapes() 
+    public void LoadAllShapes()
     {   
-        _shapes.Add(ShapeType.Sphere,       CreateSphere());
-        _shapes.Add(ShapeType.Torus,        CreateTorus());
-        _shapes.Add(ShapeType.Frequency,    CreateFrequency());
-        _shapes.Add(ShapeType.Pointcloud,   CreatePointCloud());
-        _centerCube =                       CreateCube();
+        _shapes.Add(ShapeType.Frequency,        GetFrequency());
+        _shapes.Add(ShapeType.Sphere,           GetSphere());
+        _shapes.Add(ShapeType.Impact,           GetSphereSmall());
+        _shapes.Add(ShapeType.EvenPointcloud,   GetEvenPointCloud());
+        _shapes.Add(ShapeType.Pointcloud,       GetPointCloud());
 
+        _miscShapes.Add(ShapeType.Asteroid,     GetAsteroid());
+        _miscShapes.Add(ShapeType.CenterCube,   GetCube());
+        
         SetCurrentShape(Config.shapeOnStartup);
-        InitAnimationComet(); // TODO
     }
 
-    public void SetCurrentShape(ShapeType shapeType)
+    public static void SetCurrentShape(ShapeType shapeType)
     {   
         Vector3[] shape = _shapes[shapeType];
 
-        // LinQ here was about 80x slower than the for-loop ¯\_(ツ)_/¯
-        for (int i = 0; i < _currentShape.Length; i++)
+        for (int i = 0; i < Config.totalShapeSize; i++)
         {
             _currentShape[i].Position = shape[i];
             _currentShape[i].Color = Config.shapeColor;
         }
     }
-
-    public void SetShapeColor(Color color)
+    
+    private static Vector3[] GetSphere(float offset = 1f)
     {   
-        for (int i = 0; i < _currentShape.Length; i++)
-        {   
-            _currentShape[i].Color = color;
-        }
+        const int totalSize = Config.totalShapeSize;
+        const float radius = 66f;
+
+        float spiralOffset = 700f * offset;
+        var noise = _shapes[ShapeType.Frequency];
+        var sphere = new Vector3[totalSize];
+             
+        Parallel.For(0, totalSize, i => {
+
+            // Polar coordinates
+            float theta = 2 * MathHelper.Pi * i / spiralOffset;
+            float phi = (float)Math.Acos(1 - 2 * (i + 0.5f) / totalSize);
+
+            // Polar to Cartesian coords (vocabulary++)
+            float X = radius * (float)(Math.Sin(phi) * Math.Cos(theta));
+            float Y = radius * (float)(Math.Sin(phi) * Math.Sin(theta));
+            float Z = radius * (float)Math.Cos(phi);
+            
+            // Set sphere and add some noise (Lerp) 
+            sphere[i] = Vector3.Lerp(new Vector3(X, Y, Z), noise[i], 0.016f);
+        });
+
+        return sphere;
     }
 
-    public void SetCubeColor(Color color)
+    private static Vector3[] GetSphereSmall()
     {   
-        for (int i = 0; i < _centerCube.Length; i++)
-        {
-            _centerCube[i].Color = color;
-        }
-    }
-
-    private static Vector3[] CreatePointCloud(ushort size = Config.shapeSize)
-    {
-        var shape = new Vector3[size * size * size];
-        int index = 0; 
-        
-        // Points in space!
-        for (int x = 0; x < size; x++)
-        {
-            for (int y = 0; y < size; y++)
-            {
-                for (int z = 0; z < size; z++)
-                {   
-                    // Map from -50 to 50 XYZ
-                    float pointX = Map(x, 0, (size - 1), -50, 50);
-                    float pointY = Map(y, 0, (size - 1), -50, 50);
-                    float pointZ = Map(z, 0, (size - 1), -50, 50);
-                                                    
-                    shape[index++] = new Vector3(pointX, pointY, pointZ);                     
-                } 
-            }
-        }
-
-        return shape;
-    }
-
-    private static Vector3[] CreateTorus(ushort size = Config.shapeSize) // CreateGalaxy? Flat Torus? Ring?
-    {
-        const float radius = 75f;
-        int totalSize = size * size * size;
-        var shape = new Vector3[totalSize];
-        Random random = new();
-
-        // Draw a ring with some extra randomness sprinkled on top
-        for (int i = 0; i < totalSize; i++)
-        {
-            float angle = MathHelper.TwoPi * i / totalSize;
-            float X = radius * (float)Math.Cos(angle);
-            float Z = radius * (float)Math.Sin(angle);
-
-            shape[i] = new Vector3(
-                X + random.Next(-15, 15), 
-                0 + random.Next(-2, 2), 
-                Z + random.Next(-15, 15)
-            ); 
-        }
-
-        return shape;
-    }
-
-    private static Vector3[] CreateFrequency(ushort size = Config.shapeSize) 
-    {
-        int totalSize = size * size * size;
-        var shape = new Vector3[totalSize];
-
-        // Values randomized until it looked good
-        const float amplitude = 50f;
-        const float freqX = 182.08478f;   
-        const float freqY = 357.16693f;
-
-        for (int i = 0; i < totalSize; i++) 
-        {
-            float t = i / (float)totalSize * MathHelper.TwoPi;
-
-            float X = amplitude * (float)Math.Sin(freqX * t);
-            float Y = amplitude * (float)Math.Sin(freqY * t);
-            float Z = amplitude * (float)Math.Sin((freqX + freqY) * t);
-
-            shape[i] = new Vector3(X, Y, Z);
-        }
-
-        return shape;
-    }
-
-    private static Vector3[] CreateSphere(float radius = 66f, ushort size = Config.shapeSize)
-    {
+        const int totalSize = Config.totalShapeSize;
         const float goldenRatio = 1.618034f;
-        int totalSize = size * size * size;
-        var shape = new Vector3[totalSize];        
+        const float radius = 14f;
+        var sphere = new Vector3[totalSize];
+             
+        Parallel.For(0, totalSize, i => {
 
-        for (int i = 0; i < totalSize; i++) 
-        {
             // Polar coordinates
             float theta = 2 * MathHelper.Pi * i / goldenRatio;
             float phi = (float)Math.Acos(1 - 2 * (i + 0.5f) / totalSize);
@@ -149,16 +90,137 @@ public partial class App : Game
             float Y = radius * (float)(Math.Sin(phi) * Math.Sin(theta));
             float Z = radius * (float)Math.Cos(phi);
             
-            shape[i] = new Vector3(X, Y, Z);
-        }
+            // Set sphere
+            sphere[i] = new Vector3(X, Y, Z);
+        });
 
-        return shape;
+        return sphere;
     }
 
-    public static VertexPositionColor[] CreateComet()
+    private static Vector3[] GetFrequency(float offset = 1f)
+    {
+        // Values randomized until it looked good
+        const int totalSize = Config.totalShapeSize;
+        const float amplitude = 50f;
+        float freqX = 182.08478f + offset;
+        float freqY = 657.16693f + offset;
+        var frequency = new Vector3[totalSize];
+
+        Parallel.For(0, totalSize, i => {
+            float t = i / (float)totalSize * MathHelper.TwoPi;
+
+            float X = amplitude * (float)Math.Sin(freqX * t);
+            float Y = amplitude * (float)Math.Sin(freqY * t);
+            float Z = amplitude * (float)Math.Sin((freqX + freqY) * t);
+
+            frequency[i] = new Vector3(X, Y, Z);
+        });
+
+        return frequency;
+    }
+
+    private static Vector3[] GetPointCloud(float effectOffset = 0f)
+    {   
+        const int limit = Config.shapeSize1D * 2;
+        const int cubeGap = 4;
+        const float offset = 4.3f;
+        var pointcloud = new Vector3[Config.totalShapeSize];
+        var lerpTarget = _shapes[ShapeType.EvenPointcloud];
+        int index = 0;
+
+        // Space out small cubes inside a "larger" cube
+        for (int x = 0; x < limit; x++)
+        { 
+            if ((x / cubeGap) % 2 != 0) continue;
+
+            for (int y = 0; y < limit; y++)
+            { 
+                if ((y / cubeGap) % 2 != 0) continue;
+
+                for (int z = 0; z < limit; z++)
+                { 
+                    if ((z / cubeGap) % 2 != 0) continue;
+
+                    // Map XYZ to -48, 48
+                    float pointX = Map(x, 0, (limit - 1), -limit - cubeGap, limit + cubeGap);   
+                    float pointY = Map(y, 0, (limit - 1), -limit - cubeGap, limit + cubeGap);
+                    float pointZ = Map(z, 0, (limit - 1), -limit - cubeGap, limit + cubeGap);
+                    
+                    // Set and add noise (Lerp to another shape)
+                    pointcloud[index] = Vector3.Lerp(
+                        new Vector3(
+                            pointX + offset, 
+                            pointY + offset, 
+                            pointZ + offset
+                        ),
+                        lerpTarget[index],
+                        effectOffset
+                    );
+                    index++;
+                }
+            }
+        }
+
+        return pointcloud;
+    }
+
+    private static Vector3[] GetEvenPointCloud()
+    {
+        const int size1D = Config.shapeSize1D;
+        const int limit = 48;
+        int index = 0; 
+        var pointcloud = new Vector3[Config.totalShapeSize];
+
+        // Points in space!
+        for (int x = 0; x < size1D; x++)
+        {
+            for (int y = 0; y < size1D; y++)
+            {
+                for (int z = 0; z < size1D; z++)
+                {   
+                    // Map XYZ to -48, 48 
+                    float X = Map(x, 0, (size1D - 1), -limit, limit);
+                    float Y = Map(y, 0, (size1D - 1), -limit, limit);
+                    float Z = Map(z, 0, (size1D - 1), -limit, limit);   
+                                            
+                    pointcloud[index] = new Vector3(X, Y, Z);
+                    index++;                  
+                } 
+            }
+        }
+        
+        return pointcloud;
+    }
+
+    private static Vector3[] GetTorus() // CreateGalaxy?
+    {
+        const float radius = 72f;
+        const int totalSize = Config.totalShapeSize;
+        const int ringWidth = 15;
+        var torus = new Vector3[totalSize];
+        var random = new Random();
+ 
+        // Draw a ring with some extra randomness sprinkled on top
+        for (int i = 0; i < totalSize; i++)
+        {
+            float angle = MathHelper.TwoPi * i / totalSize;
+            float X = radius * (float)Math.Cos(angle);
+            float Z = radius * (float)Math.Sin(angle);
+
+            torus[i] = new Vector3(
+                X + random.Next(-ringWidth, ringWidth), 
+                0 + random.Next(-2, 2), 
+                Z + random.Next(-ringWidth, ringWidth)
+            );
+        }
+
+        return torus;
+    }
+
+    private static VertexPositionColor[] GetAsteroid()
     {
         const float phi = 1.618034f; // Golden ratio
-        Color color = NordColors.Yellow;
+        Color color = Config.asteroidColor;
 
         VertexPositionColor[] vertices =
         [
@@ -196,7 +258,7 @@ public partial class App : Game
         return vertices;
     }
 
-    private static VertexPositionColor[] CreateCube(float size = Config.cubeScale)
+    private static VertexPositionColor[] GetCube(float size = Config.cubeScale)
     {   
         Color color = Config.cubeColor;
         
@@ -248,9 +310,29 @@ public partial class App : Game
         return cube;
     }
 
-    // C++ copy pasta
     private static float Map(float input, float fromMin, float fromMax, float toMin, float toMax)
     {
         return toMin + (toMax - toMin) * ((input - fromMin) / (fromMax - fromMin));
+    }
+
+    private void BenchmarkCopyToFunc() 
+    {   
+        const int times = 10000;
+        Utils.BenchmarkStart();
+
+        // 10000 = 53ms, 1 = 15Ms
+        for (int i = 0; i < times; i++) 
+        { 
+            _currentShape.CopyTo(_currentShapeCopy, 0);
+        } 
+
+        // 10000 = 10ms, 1 = 40Ms
+        Parallel.For(0, times, i => 
+        { 
+            _currentShape.CopyTo(_currentShapeCopy, 0); 
+        });
+
+        Utils.BenchmarkStop(); 
+        Utils.STOP();
     }
 }

@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 
-namespace SpriteClass;
+namespace Particle.Ui;
 
 public struct Sprite
 {   

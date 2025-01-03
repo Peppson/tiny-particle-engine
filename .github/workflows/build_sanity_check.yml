@@ -2,7 +2,7 @@
 on:
   push:
     branches:
-      - main
+      - '*'
 
 jobs:
   build:
@@ -23,11 +23,6 @@ jobs:
       - name: Build (Release)
         run: dotnet build -c Release
 
-      # dotnet bug with multiple symbols from cli
-      - name: Build (Debug) 1
+      - name: Build (Debug) with all define symbols
         if: success()
-        run: dotnet build -c Debug --property:DefineConstants="DEBUG_USE_KEYBOARD" 
-
-      - name: Build (Debug) 2
-        if: success()
-        run: dotnet build -c Debug --property:DefineConstants="DEBUG_COMET" 
+        run: dotnet build -c Debug -p:CommandLineConstants=DEBUG_USE_KEYBOARD%3BANIMATION_LOGGING%3BDEBUG_COMET%3BUSE_GPU_VERTEX_BUFFER%3BPERF_BENCHMARK%3BDEBUG_GRAVITY

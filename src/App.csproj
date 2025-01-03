@@ -12,11 +12,14 @@
   </PropertyGroup>
 
   <!--    #define debug symbols   -->
+  <!--    PERF_BENCHMARK          -->
+  <!--    ANIMATION_LOGGING       -->
   <!--    DEBUG_USE_KEYBOARD;     -->
   <!--    DEBUG_COMET;            -->
+  <!--    DEBUG_GRAVITY;          -->
   <!--    USE_GPU_VERTEX_BUFFER;  -->
   <PropertyGroup>
-    <DefineConstants Condition="'$(Configuration)' == 'Debug'"> DEBUG_USE_KEYBOARD; </DefineConstants>
+    <DefineConstants Condition="'$(Configuration)' == 'Debug'"> $(CommandLineConstants)</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
