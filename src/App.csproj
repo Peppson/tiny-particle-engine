@@ -6,9 +6,21 @@
     <PublishReadyToRun>false</PublishReadyToRun>
     <TieredCompilation>false</TieredCompilation>
     <UseWindowsForms>false</UseWindowsForms>
+  </PropertyGroup>
 
-    <OutputType Condition="'$(Configuration)' == 'Release'">WinExe</OutputType>
-    <OutputType Condition="'$(Configuration)' == 'Debug'">Exe</OutputType>
+  <!-- 
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <PublishSelfContained>true</PublishSelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+    <TrimUnusedDependencies>true</TrimUnusedDependencies>
+  </PropertyGroup> 
+  -->
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'"> 
+    <OutputType>WinExe</OutputType>
   </PropertyGroup>
 
   <!--    #define debug symbols   -->
@@ -18,9 +30,12 @@
   <!--    DEBUG_COMET;            -->
   <!--    DEBUG_GRAVITY;          -->
   <!--    USE_GPU_VERTEX_BUFFER;  -->
-  <PropertyGroup>
-    <DefineConstants Condition="'$(Configuration)' == 'Debug'"> $(CommandLineConstants)</DefineConstants>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <OutputType>Exe</OutputType>
+    <DefineConstants> $(CommandLineConstants)</DefineConstants>
   </PropertyGroup>
+
 
   <PropertyGroup>
     <ApplicationManifest>../app.manifest</ApplicationManifest>
