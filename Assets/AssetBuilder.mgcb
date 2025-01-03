@@ -34,7 +34,7 @@
 /processorParam:TextureFormat=Compressed
 /build:Fonts/fontSmall.spritefont
 
-#begin Icon.ico
+#begin Icons/IconNew_128x128.ico
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -44,7 +44,19 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Icon.ico
+/build:Icons/IconNew_128x128.ico
+
+#begin Icons/IconNew_32x32.ico
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Icons/IconNew_32x32.ico
 
 #begin Models/Helicopter.fbx
 /importer:FbxImporter

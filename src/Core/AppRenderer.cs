@@ -29,6 +29,7 @@ public partial class App
     public void RenderStartup()
     {   
         // Set small viewport matrices and render
+        GraphicsDevice.DepthStencilState = DepthStencilState.Default;
         GraphicsDevice.Viewport = _cam.smallViewport.viewport;
         RenderSmallViewport();
 

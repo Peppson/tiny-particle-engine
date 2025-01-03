@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>    
+    <AssemblyName>Particle Engine</AssemblyName>
     <Optimize>true</Optimize>
     <TargetFramework>net8.0-windows</TargetFramework>
     <RollForward>Major</RollForward>
@@ -17,7 +18,7 @@
     <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
     <TrimUnusedDependencies>true</TrimUnusedDependencies>
   </PropertyGroup> 
-  -->
+  --> 
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'"> 
     <OutputType>WinExe</OutputType>
@@ -33,13 +34,13 @@
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <OutputType>Exe</OutputType>
-    <DefineConstants> $(CommandLineConstants)</DefineConstants>
+    <DefineConstants> $(CommandLineConstants) </DefineConstants>
   </PropertyGroup>
 
 
   <PropertyGroup>
     <ApplicationManifest>../app.manifest</ApplicationManifest>
-    <ApplicationIcon>../Assets/Icon.ico</ApplicationIcon>
+    <ApplicationIcon>../Assets/Icons/IconNew_128x128.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,5 +1,5 @@
 
-# tiny-particle-engine ☄️
+# tiny-particle-engine ![Icon](Assets/Icons/IconNew_32x32.ico) 
 
 My attempt at some linear algebra and collision detection between points in 3D-space.   
 Built with C# and [Monogame](https://monogame.net/).  
@@ -25,13 +25,13 @@ dotnet run -c Release
 </details>    
 &nbsp;  
 
-![Random state](./Images/RandomStateNew.png)  
+![Random sphere](./Images/RandomSphere.png)  
 
 Asteroid impact
-![Asteroid impact](./Images/AsteroidImpact.png)
+![Impact](./Images/SingleImpact.png)
 
 Gravity
-![Gravity](./Images/Gravity.png) 
+![Gravity](./Images/GravityFloor.png) 
 
 
 ## Todos
