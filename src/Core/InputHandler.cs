@@ -51,8 +51,8 @@ class InputHandler
     }
 
     public void IsWindowFocused()
-    {
-        if (!_app.IsActive) Thread.Sleep(30); // Cheap sleep solution
+    {   
+        if (!_app.IsActive) Thread.Sleep(4 * (int)State.GameSpeedFactor); // Cheap sleep solution
     }
 
     public void Reset() 
@@ -63,10 +63,14 @@ class InputHandler
 
     public void ProcessMouse(MouseState mouseState)
     {   
-        if (State.IsStartup) 
-            ProcessMouseStartup(mouseState);
-        else 
-            ProcessMouseNormal(mouseState);
+        // Don't take any mouse inputs if window isnt in focused
+        if (_app.IsActive)  
+        {
+            if (State.IsStartup) 
+                ProcessMouseStartup(mouseState);
+            else 
+                ProcessMouseNormal(mouseState);
+        }
 
         _oldMouseState = mouseState;
     }

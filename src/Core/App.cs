@@ -160,6 +160,14 @@ public partial class App : Game
 
     private void ComputeFPS(float deltaTime)
     {   
+        if (!IsActive)
+        {
+            _FPS = 1;
+            _frameCount = 0;
+            _totalElapsedTime = 0;
+            return;
+        }
+
         _totalElapsedTime += deltaTime;
         _frameCount++;
 
