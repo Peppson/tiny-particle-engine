@@ -4,14 +4,15 @@
 My attempt at some linear algebra and collision detection between points in 3D-space.   
 Built with C# and [Monogame](https://monogame.net/).  
 
-* Shot asteroids from any angle
+* Shoot asteroids from the mouse pointer
 * Transitions, Animations and 3D-effects
 * Camera controls: Zoom, Rotate, and Pan
 * Fully dynamic: Multiple effects/animations/asteroids can run simultaneously
 
 ## Requirements
 * A computer! (Windows)
-* [.NET 9.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet)    
+* [.NET 9.0 or later](https://dotnet.microsoft.com/en-us/download/dotnet)
+
   
 <details>
 <summary>Setup and Run</summary>  
