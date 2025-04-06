@@ -34,7 +34,7 @@ Gravity
 ![Gravity](./Images/GravityFloor.png) 
 
 
-## Todos
+## Todo
 - [ ] Replace the helicopter with a proper 3D-axis model.
 - [ ] Add effect for "Impact" shape.
 &nbsp;
