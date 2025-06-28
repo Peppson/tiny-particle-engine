@@ -17,7 +17,7 @@ Built with C# and [Monogame](https://monogame.net/).
 <details>
 <summary>Setup and Run</summary>  
 
-```
+``` bash
 git clone https://github.com/Peppson/tiny-particle-engine.git &&
 cd tiny-particle-engine/src &&
 dotnet run -c Release
