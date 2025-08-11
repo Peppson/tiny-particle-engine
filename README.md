@@ -28,10 +28,13 @@ dotnet run -c Release
 
 ![Random sphere](./Images/RandomSphere.png)  
 
-Asteroid impact
+Impact
 ![Impact](./Images/SingleImpact.png)
 
-Gravity
+Destroyed sphere
+![Impact](./Images/DestroyedShpere.png)
+
+Gravity on
 ![Gravity](./Images/GravityFloor.png) 
 
 
