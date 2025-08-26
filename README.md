@@ -9,13 +9,15 @@ Built with C# and [Monogame](https://monogame.net/).
 * Camera controls: Zoom, Rotate, and Pan
 * Fully dynamic: Multiple effects/animations/asteroids can run simultaneously
 
-## Requirements
-* A computer! (Windows)
-* [.NET 9.0 or later](https://dotnet.microsoft.com/en-us/download/dotnet)
+## Try it out?
 
-  
 <details>
-<summary>Setup and Run</summary>  
+<summary>Run from source</summary>  
+
+#### Requirements:
+
+* A computer! (Windows)
+* [.NET 8.0](https://dotnet.microsoft.com/en-us/download/dotnet)
 
 ``` bash
 git clone https://github.com/Peppson/tiny-particle-engine.git &&
@@ -23,8 +25,18 @@ cd tiny-particle-engine/src &&
 dotnet run -c Release
 ```
 
-</details>    
-&nbsp;  
+</details> 
+
+<details> 
+<summary>Download prebuilt</summary>
+
+#### Requirements:
+
+* A computer! (Windows)
+
+Grab the latest release from the [Releases tab](https://github.com/Peppson/tiny-particle-engine/releases)  
+
+</details>
 
 ![Random sphere](./Images/RandomSphere.png)  
 

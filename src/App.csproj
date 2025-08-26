@@ -9,17 +9,16 @@
     <UseWindowsForms>false</UseWindowsForms>
   </PropertyGroup>
 
-  <!-- 
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(PublishDir)' != ''">
     <TargetFramework>net8.0-windows</TargetFramework>
-    <PublishSelfContained>true</PublishSelfContained>
     <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <DebugType>None</DebugType>
     <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
     <TrimUnusedDependencies>true</TrimUnusedDependencies>
   </PropertyGroup> 
-  --> 
-
+   
   <PropertyGroup Condition="'$(Configuration)' == 'Release'"> 
     <OutputType>WinExe</OutputType>
   </PropertyGroup>
@@ -36,7 +35,6 @@
     <OutputType>Exe</OutputType>
     <DefineConstants> $(CommandLineConstants) </DefineConstants>
   </PropertyGroup>
-
 
   <PropertyGroup>
     <ApplicationManifest>../app.manifest</ApplicationManifest>
