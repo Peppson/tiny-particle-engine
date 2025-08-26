@@ -7,7 +7,20 @@ Built with C# and [Monogame](https://monogame.net/).
 * Shoot asteroids from the mouse pointer
 * Transitions, Animations and 3D-effects
 * Camera controls: Zoom, Rotate, and Pan
-* Fully dynamic: Multiple effects/animations/asteroids can run simultaneously
+* Multiple effects/animations/asteroids can run simultaneously
+
+## Screenshots
+
+![Random sphere](./Images/RandomSphere.png)  
+
+Impact
+![Impact](./Images/SingleImpact.png)
+
+Destroyed sphere
+![Impact](./Images/DestroyedShpere.png)
+
+Gravity on
+![Gravity](./Images/GravityFloor.png) 
 
 ## Try it out?
 
@@ -37,17 +50,6 @@ dotnet run -c Release
 Grab the latest release from the [Releases tab](https://github.com/Peppson/tiny-particle-engine/releases)  
 
 </details>
-
-![Random sphere](./Images/RandomSphere.png)  
-
-Impact
-![Impact](./Images/SingleImpact.png)
-
-Destroyed sphere
-![Impact](./Images/DestroyedShpere.png)
-
-Gravity on
-![Gravity](./Images/GravityFloor.png) 
 
 
 ## Todo
