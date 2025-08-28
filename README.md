@@ -19,9 +19,6 @@ Impact
 Destroyed sphere
 ![Impact](./Images/DestroyedShpere.png)
 
-Gravity on
-![Gravity](./Images/GravityFloor.png) 
-
 ## Try it out?
 
 <details>
